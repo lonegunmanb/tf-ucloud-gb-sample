@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/ahmetb/go-linq"
-	"go-funk"
 	"strings"
 )
 
@@ -39,16 +37,31 @@ type Command struct {
 }
 
 func parseFromAndToFromCmd(cmd string) (string, string, error) {
-	if !funk.Contains(cmds, cmd) {
+	if !validCmd(cmd) {
 		return "", "", fmt.Errorf("unrecognized cmd %s, should in %s", cmd, strings.Join(cmds, ", "))
 	}
 
 	nodes := strings.Split(cmd, "2")
-	from := linq.From(states).FirstWith(func(state interface{}) bool {
-		return strings.HasPrefix(state.(string), nodes[0])
-	}).(string)
-	to := linq.From(states).FirstWith(func(state interface{}) bool {
-		return strings.HasPrefix(state.(string), nodes[1])
-	}).(string)
-	return from, to, nil
+	from := firstString(states, nodes[0], func(state string, fromState string) bool {
+		return strings.HasPrefix(state, fromState)
+	})
+	to := firstString(states, nodes[1], func(state string, toState string) bool {
+		return strings.HasPrefix(state, toState)
+	})
+	return *from, *to, nil
+}
+
+func validCmd(cmd string) bool {
+	return firstString(cmds, cmd, func(s string, s2 string) bool {
+		return s == s2
+	}) != nil
+}
+
+func firstString(slice []string, argument string, prediction func(string, string) bool) *string {
+	for _, item := range slice {
+		if prediction(item, argument) {
+			return &item
+		}
+	}
+	return nil
 }
