@@ -132,3 +132,10 @@ func checkToStagingState(cmd Command) error {
 	}
 	return nil
 }
+
+func checkToBlueState(cmd Command) error {
+	if cmd.desiredBlueCount == 0 {
+		return errors.New("cannot transit to blue state with zero blue desired count")
+	}
+	return nil
+}

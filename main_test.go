@@ -44,7 +44,7 @@ func TestParseIncorrectCmdShouldGetError(t *testing.T) {
 	}
 }
 
-func TestFromInitStateWithNonZeroCurrentCountShouldReturnError(t *testing.T) {
+func TestCheckFromInitStateWithNonZeroCurrentCountShouldReturnError(t *testing.T) {
 	incorrectCmds := []Command{
 		{currentBlueCount: 1, currentGreenCount: 0},
 		{currentBlueCount: 0, currentGreenCount: 1},
@@ -55,7 +55,7 @@ func TestFromInitStateWithNonZeroCurrentCountShouldReturnError(t *testing.T) {
 	}
 }
 
-func TestFromInitStateWithZeroBlueAndGreenCountShouldSuccess(t *testing.T) {
+func TestCheckFromInitStateWithZeroBlueAndGreenCountShouldSuccess(t *testing.T) {
 	cmd := Command{
 		currentBlueCount:  0,
 		currentGreenCount: 0,
@@ -64,7 +64,7 @@ func TestFromInitStateWithZeroBlueAndGreenCountShouldSuccess(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestFromBlueStateWithIncorrectStatusShouldReturnError(t *testing.T) {
+func TestCheckFromBlueStateWithIncorrectStatusShouldReturnError(t *testing.T) {
 	incorrectCmds := []struct {
 		cmd              Command
 		expectedErrorMsg string
@@ -80,7 +80,7 @@ func TestFromBlueStateWithIncorrectStatusShouldReturnError(t *testing.T) {
 	}
 }
 
-func TestFromBlueStateWithCorrectStatusShouldReturnNil(t *testing.T) {
+func TestCheckFromBlueStateWithCorrectStatusShouldReturnNil(t *testing.T) {
 	cmd := Command{
 		currentBlueCount:  1,
 		currentGreenCount: 0,
@@ -89,7 +89,7 @@ func TestFromBlueStateWithCorrectStatusShouldReturnNil(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestFromGreenStateWithIncorrectStatusShouldReturnError(t *testing.T) {
+func TestCheckFromGreenStateWithIncorrectStatusShouldReturnError(t *testing.T) {
 	incorrectCmds := []struct {
 		cmd              Command
 		expectedErrorMsg string
@@ -105,7 +105,7 @@ func TestFromGreenStateWithIncorrectStatusShouldReturnError(t *testing.T) {
 	}
 }
 
-func TestFromGreenStateWithCorrectStatusShouldReturnNil(t *testing.T) {
+func TestCheckFromGreenStateWithCorrectStatusShouldReturnNil(t *testing.T) {
 	cmd := Command{
 		currentBlueCount:  0,
 		currentGreenCount: 1,
@@ -114,7 +114,7 @@ func TestFromGreenStateWithCorrectStatusShouldReturnNil(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestFromStagingStateWithIncorrectStatusShouldReturnError(t *testing.T) {
+func TestCheckFromStagingStateWithIncorrectStatusShouldReturnError(t *testing.T) {
 	incorrectCmds := []struct {
 		cmd              Command
 		expectedErrorMsg string
@@ -130,7 +130,7 @@ func TestFromStagingStateWithIncorrectStatusShouldReturnError(t *testing.T) {
 	}
 }
 
-func TestFromStagingStateWithCorrectStatusShouldReturnNil(t *testing.T) {
+func TestCheckFromStagingStateWithCorrectStatusShouldReturnNil(t *testing.T) {
 	cmd := Command{
 		currentBlueCount:  1,
 		currentGreenCount: 1,
@@ -139,7 +139,7 @@ func TestFromStagingStateWithCorrectStatusShouldReturnNil(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestToStagingStateWithIncorrectStatusShouldReturnError(t *testing.T) {
+func TestCheckToStagingStateWithIncorrectStatusShouldReturnError(t *testing.T) {
 	incorrectCmds := []Command{
 		{desiredBlueCount: 0, desiredGreenCount: 0},
 		{desiredBlueCount: 0, desiredGreenCount: 1},
@@ -153,13 +153,32 @@ func TestToStagingStateWithIncorrectStatusShouldReturnError(t *testing.T) {
 	}
 }
 
-func TestToStagingStateWithCorrectStatusShouldReturnNil(t *testing.T) {
+func TestCheckToStagingStateWithCorrectStatusShouldReturnNil(t *testing.T) {
 	correctCmds := []Command{
 		{desiredBlueCount: 1, desiredGreenCount: 1, currentBlueCount: 1, currentGreenCount: 0, fromState: Blue},
 		{desiredBlueCount: 1, desiredGreenCount: 1, currentBlueCount: 0, currentGreenCount: 1, fromState: Green},
 	}
 	for _, cmd := range correctCmds {
 		err := checkToStagingState(cmd)
+		assert.Nil(t, err)
+	}
+}
+
+func TestCheckToBlueWithIncorrectStatusShouldReturnError(t *testing.T) {
+	incorrectCmd := Command{
+		desiredBlueCount: 0,
+	}
+	err := checkToBlueState(incorrectCmd)
+	assert.NotNil(t, err)
+}
+
+func TestCheckToBlueWithCorrectStatusShouldReturnNil(t *testing.T) {
+	cmds := []Command{
+		{desiredBlueCount: 1, currentGreenCount: 1, currentBlueCount: 1, fromState: Staging},
+		{desiredBlueCount: 1, currentGreenCount: 0, currentBlueCount: 0, fromState: Init},
+	}
+	for _, cmd := range cmds {
+		err := checkToBlueState(cmd)
 		assert.Nil(t, err)
 	}
 }
