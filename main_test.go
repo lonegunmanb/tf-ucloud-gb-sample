@@ -79,3 +79,37 @@ func TestFromBlueStateWithIncorrectStatusShouldReturnError(t *testing.T) {
 		assert.True(t, strings.Contains(err.Error(), input.expectedErrorMsg))
 	}
 }
+
+func TestFromBlueStateWithCorrectStatusShouldReturnNil(t *testing.T) {
+	cmd := Command{
+		currentBlueCount:  1,
+		currentGreenCount: 0,
+	}
+	err := checkFromBlueState(cmd)
+	assert.Nil(t, err)
+}
+
+func TestFromGreenStateWithIncorrectStatusShouldReturnError(t *testing.T) {
+	incorrectCmds := []struct {
+		cmd              Command
+		expectedErrorMsg string
+	}{
+		{cmd: Command{currentBlueCount: 0, currentGreenCount: 0}, expectedErrorMsg: Init},
+		{cmd: Command{currentBlueCount: 1, currentGreenCount: 0}, expectedErrorMsg: Blue},
+		{cmd: Command{currentBlueCount: 1, currentGreenCount: 1}, expectedErrorMsg: Staging},
+	}
+	for _, input := range incorrectCmds {
+		err := checkFromGreenState(input.cmd)
+		assert.NotNil(t, err)
+		assert.True(t, strings.Contains(err.Error(), input.expectedErrorMsg))
+	}
+}
+
+func TestFromGreenStateWithCorrectStatusShouldReturnNil(t *testing.T) {
+	cmd := Command{
+		currentBlueCount:  0,
+		currentGreenCount: 1,
+	}
+	err := checkFromGreenState(cmd)
+	assert.Nil(t, err)
+}
