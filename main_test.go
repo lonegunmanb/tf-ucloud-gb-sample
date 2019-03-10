@@ -42,3 +42,23 @@ func TestParseIncorrectCmdShouldGetError(t *testing.T) {
 		assert.NotNil(t, err)
 	}
 }
+
+func TestFromInitStateWithNonZeroCurrentCountShouldReturnError(t *testing.T) {
+	incorrectCmds := []Command{
+		{currentBlueCount: 1, currentGreenCount: 0},
+		{currentBlueCount: 0, currentGreenCount: 1},
+	}
+	for _, incorrectCmd := range incorrectCmds {
+		err := checkFromInitState(incorrectCmd)
+		assert.NotNil(t, err)
+	}
+}
+
+func TestFromInitStateWithZeroBlueAndGreenCountShouldSuccess(t *testing.T) {
+	cmd := Command{
+		currentBlueCount:  0,
+		currentGreenCount: 0,
+	}
+	err := checkFromInitState(cmd)
+	assert.Nil(t, err)
+}

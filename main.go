@@ -65,3 +65,10 @@ func firstString(slice []string, argument string, prediction func(string, string
 	}
 	return nil
 }
+
+func checkFromInitState(cmd Command) error {
+	if cmd.currentBlueCount != 0 || cmd.currentGreenCount != 0 {
+		return fmt.Errorf("current blue and green counts are %d and %d so you cannot from init state", cmd.currentBlueCount, cmd.currentGreenCount)
+	}
+	return nil
+}
