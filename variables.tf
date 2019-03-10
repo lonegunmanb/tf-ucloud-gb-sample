@@ -36,3 +36,7 @@ variable "root_password" {}
 variable "server_name_prefix" {
   default = "example"
 }
+
+variable "operation" {}
+variable "desired_blue_count" {}
+variable "desired_green_count" {}

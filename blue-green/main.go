@@ -49,6 +49,17 @@ var cmds = []string{
 }
 
 func main() {
+	command, err := parseCommand()
+	executedCmd, err := command.execute()
+	if err != nil {
+		exitError(err)
+	}
+	executedCmd.DesiredBlueCount = strconv.Itoa(executedCmd.desiredBlueCount)
+	executedCmd.DesiredGreenCount = strconv.Itoa(executedCmd.desiredGreenCount)
+	outputCommand(executedCmd, err)
+}
+
+func parseCommand() (Command, error) {
 	cmd := flag.String("operation", "", "")
 	currentBlueCount := flag.Int("currentBlue", 0, "")
 	currentGreenCount := flag.Int("currentGreen", 0, "")
@@ -56,11 +67,12 @@ func main() {
 	desiredGreenCount := flag.Int("desiredGreen", 0, "")
 	flag.Parse()
 	if *cmd == Destroy {
+		//desired blue and green count equal to current blue and green count in case of we use "destroy" operation but use terraform apply by mistake
 		outputCommand(Command{
-			DesiredBlueCount:  "0",
-			DesiredGreenCount: "0",
+			DesiredBlueCount:  strconv.Itoa(*currentBlueCount),
+			DesiredGreenCount: strconv.Itoa(*currentGreenCount),
 		}, nil)
-		return
+		os.Exit(0)
 	}
 	from, to, err := parseFromAndToFromCmd(*cmd)
 	if err != nil {
@@ -75,13 +87,7 @@ func main() {
 		desiredBlueCount:  *desiredBlueCount,
 		desiredGreenCount: *desiredGreenCount,
 	}
-	executedCmd, err := command.execute()
-	if err != nil {
-		exitError(err)
-	}
-	executedCmd.DesiredBlueCount = strconv.Itoa(executedCmd.desiredBlueCount)
-	executedCmd.DesiredGreenCount = strconv.Itoa(executedCmd.desiredGreenCount)
-	outputCommand(executedCmd, err)
+	return command, err
 }
 
 func outputCommand(executedCmd Command, err error) {
@@ -224,9 +230,6 @@ func checkToGreenState(cmd Command) error {
 }
 
 func (cmd Command) adjustDesiredCount() Command {
-	if cmd.fromState != Staging {
-		return cmd
-	}
 	if cmd.toState == Blue {
 		cmd.desiredGreenCount = 0
 	} else if cmd.toState == Green {

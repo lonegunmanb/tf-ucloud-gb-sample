@@ -220,6 +220,16 @@ func TestTransitFromStagingToSomeStateShouldSetOriginStateDesiredCountToZero(t *
 			0,
 			1,
 		},
+		{
+			Command{desiredBlueCount: 1, desiredGreenCount: 1, fromState: Blue, toState: Blue},
+			1,
+			0,
+		},
+		{
+			Command{desiredBlueCount: 1, desiredGreenCount: 1, fromState: Green, toState: Green},
+			0,
+			1,
+		},
 	}
 	for _, input := range inputs {
 		cmd := input.cmd.adjustDesiredCount()

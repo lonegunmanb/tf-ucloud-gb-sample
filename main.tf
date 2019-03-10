@@ -33,11 +33,12 @@ locals {
   current_green_count = "${length(data.ucloud_instances.current_green.instances)}"
 }
 
+
 module "bg_module" {
   source = "./blue-green"
-  operation = "b2s"
-  desired_blue_count = 1
-  desired_green_count = 1
+  operation = "${var.operation}"
+  desired_blue_count = "${var.desired_blue_count}"
+  desired_green_count = "${var.desired_green_count}"
   current_blue_count = "${local.current_blue_count}"
   current_green_count = "${local.current_green_count}"
 }
@@ -69,6 +70,10 @@ module "green" {
   security_group_id = "${module.network.sg_id}"
   az = "${var.green_az}"
 }
+
+
+
+
 //
 //output "lb_target" {
 //  value = "${module.bg_module.lb_target}"

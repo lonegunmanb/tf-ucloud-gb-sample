@@ -1,6 +1,4 @@
-variable "operation" {
-  default = ""
-}
+variable "operation" {}
 variable "desired_blue_count" {}
 variable "desired_green_count" {}
 variable "current_blue_count" {}
