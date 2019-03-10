@@ -174,11 +174,30 @@ func TestCheckToBlueWithIncorrectStatusShouldReturnError(t *testing.T) {
 
 func TestCheckToBlueWithCorrectStatusShouldReturnNil(t *testing.T) {
 	cmds := []Command{
-		{desiredBlueCount: 1, currentGreenCount: 1, currentBlueCount: 1, fromState: Staging},
-		{desiredBlueCount: 1, currentGreenCount: 0, currentBlueCount: 0, fromState: Init},
+		{desiredBlueCount: 1, currentBlueCount: 1, currentGreenCount: 1, fromState: Staging},
+		{desiredBlueCount: 1, currentBlueCount: 0, currentGreenCount: 0, fromState: Init},
 	}
 	for _, cmd := range cmds {
 		err := checkToBlueState(cmd)
+		assert.Nil(t, err)
+	}
+}
+
+func TestCheckToGreenWithIncorrectStatusShouldReturnError(t *testing.T) {
+	incorrectCmd := Command{
+		desiredGreenCount: 0,
+	}
+	err := checkToGreenState(incorrectCmd)
+	assert.NotNil(t, err)
+}
+
+func TestCheckToGreenWithCorrectStatusShouldReturnNil(t *testing.T) {
+	cmds := []Command{
+		{desiredGreenCount: 1, currentBlueCount: 1, currentGreenCount: 1, fromState: Staging},
+		{desiredGreenCount: 1, currentBlueCount: 0, currentGreenCount: 0, fromState: Init},
+	}
+	for _, cmd := range cmds {
+		err := checkToGreenState(cmd)
 		assert.Nil(t, err)
 	}
 }

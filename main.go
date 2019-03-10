@@ -139,3 +139,10 @@ func checkToBlueState(cmd Command) error {
 	}
 	return nil
 }
+
+func checkToGreenState(cmd Command) error {
+	if cmd.desiredGreenCount == 0 {
+		return errors.New("cannot transit to green state with zero green desired count")
+	}
+	return nil
+}
