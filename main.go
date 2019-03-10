@@ -99,3 +99,16 @@ func checkFromGreenState(cmd Command) error {
 	}
 	return nil
 }
+
+func checkFromStagingState(cmd Command) error {
+	if cmd.currentBlueCount == 0 && cmd.currentGreenCount == 0 {
+		return errors.New("both current blue and green counts are zero, so you are from init state")
+	}
+	if cmd.currentBlueCount > 0 && cmd.currentGreenCount == 0 {
+		return fmt.Errorf("current blue count is %d and current green count is 0, so you are from blue state", cmd.currentBlueCount)
+	}
+	if cmd.currentBlueCount == 0 && cmd.currentGreenCount > 0 {
+		return fmt.Errorf("current blue count is 0 and current green count is %d, so you are from green state", cmd.currentGreenCount)
+	}
+	return nil
+}
