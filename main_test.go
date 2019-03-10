@@ -146,8 +146,8 @@ func TestCheckToStagingStateWithIncorrectStatusShouldReturnError(t *testing.T) {
 		{desiredBlueCount: 0, desiredGreenCount: 0},
 		{desiredBlueCount: 0, desiredGreenCount: 1},
 		{desiredBlueCount: 1, desiredGreenCount: 0},
-		{desiredBlueCount: 1, desiredGreenCount: 1, currentBlueCount: 2, currentGreenCount: 0, fromState: Blue},
-		{desiredBlueCount: 1, desiredGreenCount: 1, currentBlueCount: 0, currentGreenCount: 2, fromState: Green},
+		{currentBlueCount: 2, currentGreenCount: 0, desiredBlueCount: 1, desiredGreenCount: 1, fromState: Blue},
+		{currentBlueCount: 0, currentGreenCount: 2, desiredBlueCount: 1, desiredGreenCount: 1, fromState: Green},
 	}
 	for _, cmd := range incorrectCmds {
 		err := checkToStagingState(cmd)
@@ -201,5 +201,41 @@ func TestCheckToGreenWithCorrectStatusShouldReturnNil(t *testing.T) {
 	for _, cmd := range cmds {
 		err := checkToGreenState(cmd)
 		assert.Nil(t, err)
+	}
+}
+
+func TestTransitFromStagingToSomeStateShouldSetOriginStateDesiredCountToZero(t *testing.T) {
+	inputs := []struct {
+		cmd               Command
+		desiredBlueCount  int
+		desiredGreenCount int
+	}{
+		{
+			Command{desiredBlueCount: 1, desiredGreenCount: 1, fromState: Staging, toState: Blue},
+			1,
+			0,
+		},
+		{
+			Command{desiredBlueCount: 1, desiredGreenCount: 1, fromState: Staging, toState: Green},
+			0,
+			1,
+		},
+	}
+	for _, input := range inputs {
+		cmd := adjustDesiredCount(input.cmd)
+		assert.Equal(t, input.desiredBlueCount, cmd.desiredBlueCount)
+		assert.Equal(t, input.desiredGreenCount, cmd.desiredGreenCount)
+	}
+}
+
+func TestNotTransitFromStagingToSomeStateShouldNotModifyDesiredCounts(t *testing.T) {
+	cmds := []Command{
+		{desiredBlueCount: 1, desiredGreenCount: 1, fromState: Init},
+		{desiredBlueCount: 1, desiredGreenCount: 1, fromState: Blue},
+		{desiredBlueCount: 1, desiredGreenCount: 1, fromState: Green},
+	}
+	for _, cmd := range cmds {
+		adjustedCmd := adjustDesiredCount(cmd)
+		assert.Equal(t, cmd, adjustedCmd)
 	}
 }

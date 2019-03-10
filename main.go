@@ -154,3 +154,15 @@ func checkToGreenState(cmd Command) error {
 	}
 	return nil
 }
+
+func adjustDesiredCount(cmd Command) Command {
+	if cmd.fromState != Staging {
+		return cmd
+	}
+	if cmd.toState == Blue {
+		cmd.desiredGreenCount = 0
+	} else if cmd.toState == Green {
+		cmd.desiredBlueCount = 0
+	}
+	return cmd
+}
