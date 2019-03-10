@@ -14,6 +14,7 @@ const Init = "init"
 const Blue = "blue"
 const Green = "green"
 const Staging = "staging"
+const Destroy = "destroy"
 
 var states = []string{
 	Init,
@@ -44,6 +45,7 @@ var cmds = []string{
 	"s2g",
 	"b2b",
 	"g2g",
+	"destroy",
 }
 
 func main() {
@@ -53,6 +55,13 @@ func main() {
 	desiredBlueCount := flag.Int("desiredBlue", 0, "")
 	desiredGreenCount := flag.Int("desiredGreen", 0, "")
 	flag.Parse()
+	if *cmd == Destroy {
+		outputCommand(Command{
+			DesiredBlueCount:  "0",
+			DesiredGreenCount: "0",
+		}, nil)
+		return
+	}
 	from, to, err := parseFromAndToFromCmd(*cmd)
 	if err != nil {
 		exitError(err)
@@ -67,17 +76,20 @@ func main() {
 		desiredGreenCount: *desiredGreenCount,
 	}
 	executedCmd, err := command.execute()
-	executedCmd.DesiredBlueCount = strconv.Itoa(executedCmd.desiredBlueCount)
-	executedCmd.DesiredGreenCount = strconv.Itoa(executedCmd.desiredGreenCount)
 	if err != nil {
 		exitError(err)
 	}
+	executedCmd.DesiredBlueCount = strconv.Itoa(executedCmd.desiredBlueCount)
+	executedCmd.DesiredGreenCount = strconv.Itoa(executedCmd.desiredGreenCount)
+	outputCommand(executedCmd, err)
+}
+
+func outputCommand(executedCmd Command, err error) {
 	bytes, err := json.Marshal(executedCmd)
 	if err != nil {
 		exitError(err)
 	}
-	jsonOut := string(bytes)
-	fmt.Print(jsonOut)
+	fmt.Print(string(bytes))
 }
 
 func exitError(err error) {
