@@ -18,6 +18,13 @@ var states = []string{
 	Staging,
 }
 
+var fromStateCheckers = map[string]func(Command) error{
+	Init:    checkFromInitState,
+	Blue:    checkFromBlueState,
+	Green:   checkFromGreenState,
+	Staging: checkFromStagingState,
+}
+
 var cmds = []string{
 	"i2b",
 	"i2g",
@@ -109,6 +116,19 @@ func checkFromStagingState(cmd Command) error {
 	}
 	if cmd.currentBlueCount == 0 && cmd.currentGreenCount > 0 {
 		return fmt.Errorf("current blue count is 0 and current green count is %d, so you are from green state", cmd.currentGreenCount)
+	}
+	return nil
+}
+
+func checkToStagingState(cmd Command) error {
+	if cmd.desiredBlueCount == 0 || cmd.desiredGreenCount == 0 {
+		return errors.New("either blue or green desired count is zero, are you really want transit to staging?")
+	}
+	if cmd.fromState == Blue && cmd.currentBlueCount != cmd.desiredBlueCount {
+		return fmt.Errorf("current blue count is %d and desired blue count is %d, transit to staging state cannot change both blue and green counts", cmd.currentBlueCount, cmd.desiredBlueCount)
+	}
+	if cmd.fromState == Green && cmd.currentGreenCount != cmd.desiredGreenCount {
+		return fmt.Errorf("current green count is %d and desired green count is %d, transit to staging state cannot change both blue and green counts", cmd.currentGreenCount, cmd.desiredGreenCount)
 	}
 	return nil
 }

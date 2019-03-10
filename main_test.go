@@ -138,3 +138,28 @@ func TestFromStagingStateWithCorrectStatusShouldReturnNil(t *testing.T) {
 	err := checkFromStagingState(cmd)
 	assert.Nil(t, err)
 }
+
+func TestToStagingStateWithIncorrectStatusShouldReturnError(t *testing.T) {
+	incorrectCmds := []Command{
+		{desiredBlueCount: 0, desiredGreenCount: 0},
+		{desiredBlueCount: 0, desiredGreenCount: 1},
+		{desiredBlueCount: 1, desiredGreenCount: 0},
+		{desiredBlueCount: 1, desiredGreenCount: 1, currentBlueCount: 2, currentGreenCount: 0, fromState: Blue},
+		{desiredBlueCount: 1, desiredGreenCount: 1, currentBlueCount: 0, currentGreenCount: 2, fromState: Green},
+	}
+	for _, cmd := range incorrectCmds {
+		err := checkToStagingState(cmd)
+		assert.NotNil(t, err)
+	}
+}
+
+func TestToStagingStateWithCorrectStatusShouldReturnNil(t *testing.T) {
+	correctCmds := []Command{
+		{desiredBlueCount: 1, desiredGreenCount: 1, currentBlueCount: 1, currentGreenCount: 0, fromState: Blue},
+		{desiredBlueCount: 1, desiredGreenCount: 1, currentBlueCount: 0, currentGreenCount: 1, fromState: Green},
+	}
+	for _, cmd := range correctCmds {
+		err := checkToStagingState(cmd)
+		assert.Nil(t, err)
+	}
+}
