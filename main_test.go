@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/stretchr/testify/assert"
+	"strings"
 	"testing"
 )
 
@@ -61,4 +62,20 @@ func TestFromInitStateWithZeroBlueAndGreenCountShouldSuccess(t *testing.T) {
 	}
 	err := checkFromInitState(cmd)
 	assert.Nil(t, err)
+}
+
+func TestFromBlueStateWithIncorrectStatusShouldReturnError(t *testing.T) {
+	incorrectCmds := []struct {
+		cmd              Command
+		expectedErrorMsg string
+	}{
+		{cmd: Command{currentBlueCount: 0, currentGreenCount: 0}, expectedErrorMsg: Init},
+		{cmd: Command{currentBlueCount: 0, currentGreenCount: 1}, expectedErrorMsg: Green},
+		{cmd: Command{currentBlueCount: 1, currentGreenCount: 1}, expectedErrorMsg: Staging},
+	}
+	for _, input := range incorrectCmds {
+		err := checkFromBlueState(input.cmd)
+		assert.NotNil(t, err)
+		assert.True(t, strings.Contains(err.Error(), input.expectedErrorMsg))
+	}
 }

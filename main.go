@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -69,6 +70,19 @@ func firstString(slice []string, argument string, prediction func(string, string
 func checkFromInitState(cmd Command) error {
 	if cmd.currentBlueCount != 0 || cmd.currentGreenCount != 0 {
 		return fmt.Errorf("current blue and green counts are %d and %d so you cannot from init state", cmd.currentBlueCount, cmd.currentGreenCount)
+	}
+	return nil
+}
+
+func checkFromBlueState(cmd Command) error {
+	if cmd.currentBlueCount == 0 && cmd.currentGreenCount == 0 {
+		return errors.New("both current blue and green counts are zero, so you are from init state")
+	}
+	if cmd.currentBlueCount > 0 && cmd.currentGreenCount > 0 {
+		return errors.New("both current blue and green counts are greater than zero, so you are from staging state")
+	}
+	if cmd.currentBlueCount == 0 && cmd.currentGreenCount > 0 {
+		return fmt.Errorf("current blue count is 0 and current green count is %d, so you are from green state", cmd.currentGreenCount)
 	}
 	return nil
 }
