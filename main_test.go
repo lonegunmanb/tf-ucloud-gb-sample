@@ -222,7 +222,7 @@ func TestTransitFromStagingToSomeStateShouldSetOriginStateDesiredCountToZero(t *
 		},
 	}
 	for _, input := range inputs {
-		cmd := adjustDesiredCount(input.cmd)
+		cmd := input.cmd.adjustDesiredCount()
 		assert.Equal(t, input.desiredBlueCount, cmd.desiredBlueCount)
 		assert.Equal(t, input.desiredGreenCount, cmd.desiredGreenCount)
 	}
@@ -235,7 +235,44 @@ func TestNotTransitFromStagingToSomeStateShouldNotModifyDesiredCounts(t *testing
 		{desiredBlueCount: 1, desiredGreenCount: 1, fromState: Green},
 	}
 	for _, cmd := range cmds {
-		adjustedCmd := adjustDesiredCount(cmd)
+		adjustedCmd := cmd.adjustDesiredCount()
 		assert.Equal(t, cmd, adjustedCmd)
+	}
+}
+
+func TestSetLoadBalanceDirection(t *testing.T) {
+	inputs := []struct {
+		cmd               Command
+		expectedDirection string
+	}{
+		{
+			cmd:               Command{fromState: Init, toState: Blue},
+			expectedDirection: Blue,
+		},
+		{
+			cmd:               Command{fromState: Init, toState: Green},
+			expectedDirection: Green,
+		},
+		{
+			cmd:               Command{fromState: Blue, toState: Staging},
+			expectedDirection: Blue,
+		},
+		{
+			cmd:               Command{fromState: Green, toState: Staging},
+			expectedDirection: Green,
+		},
+		{
+			cmd:               Command{fromState: Staging, toState: Blue},
+			expectedDirection: Blue,
+		},
+		{
+			cmd:               Command{fromState: Staging, toState: Green},
+			expectedDirection: Green,
+		},
+	}
+
+	for _, input := range inputs {
+		newCmd := input.cmd.setLoadBalanceDirection()
+		assert.Equal(t, input.expectedDirection, newCmd.loadBalanceDirection)
 	}
 }

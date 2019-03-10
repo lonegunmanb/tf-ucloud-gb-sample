@@ -43,13 +43,14 @@ var cmds = []string{
 }
 
 type Command struct {
-	cmd               string
-	fromState         string
-	toState           string
-	currentBlueCount  int
-	currentGreenCount int
-	desiredBlueCount  int
-	desiredGreenCount int
+	cmd                  string
+	fromState            string
+	toState              string
+	currentBlueCount     int
+	currentGreenCount    int
+	desiredBlueCount     int
+	desiredGreenCount    int
+	loadBalanceDirection string
 }
 
 func parseFromAndToFromCmd(cmd string) (string, string, error) {
@@ -155,7 +156,7 @@ func checkToGreenState(cmd Command) error {
 	return nil
 }
 
-func adjustDesiredCount(cmd Command) Command {
+func (cmd Command) adjustDesiredCount() Command {
 	if cmd.fromState != Staging {
 		return cmd
 	}
@@ -163,6 +164,15 @@ func adjustDesiredCount(cmd Command) Command {
 		cmd.desiredGreenCount = 0
 	} else if cmd.toState == Green {
 		cmd.desiredBlueCount = 0
+	}
+	return cmd
+}
+
+func (cmd Command) setLoadBalanceDirection() Command {
+	if cmd.toState == Staging {
+		cmd.loadBalanceDirection = cmd.fromState
+	} else {
+		cmd.loadBalanceDirection = cmd.toState
 	}
 	return cmd
 }
