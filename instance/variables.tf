@@ -14,4 +14,3 @@ variable "vpc_id" {}
 variable "duration" {
   default = 1
 }
-variable "begin_signal" {}

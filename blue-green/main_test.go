@@ -273,6 +273,6 @@ func TestSetLoadBalanceDirection(t *testing.T) {
 
 	for _, input := range inputs {
 		newCmd := input.cmd.setLoadBalanceDirection()
-		assert.Equal(t, input.expectedDirection, newCmd.loadBalanceDirection)
+		assert.Equal(t, input.expectedDirection, newCmd.LoadBalanceDirection)
 	}
 }

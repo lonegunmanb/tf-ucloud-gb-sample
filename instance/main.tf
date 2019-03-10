@@ -11,5 +11,4 @@ resource "ucloud_instance" "server" {
   vpc_id = "${var.vpc_id}"
   subnet_id = "${var.subnet_id}"
   security_group = "${var.security_group_id}"
-  remark = "${var.begin_signal}"
 }

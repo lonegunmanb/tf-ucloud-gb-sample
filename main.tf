@@ -35,8 +35,8 @@ locals {
 
 module "bg_module" {
   source = "./blue-green"
-  operation = "i2g"
-  desired_blue_count =1
+  operation = "b2s"
+  desired_blue_count = 1
   desired_green_count = 1
   current_blue_count = "${local.current_blue_count}"
   current_green_count = "${local.current_green_count}"
@@ -54,7 +54,6 @@ module "blue" {
   root_password = "${var.root_password}"
   security_group_id = "${module.network.sg_id}"
   az = "${var.blue_az}"
-  begin_signal = "${module.bg_module.signal}"
 }
 
 module "green" {
@@ -69,7 +68,6 @@ module "green" {
   root_password = "${var.root_password}"
   security_group_id = "${module.network.sg_id}"
   az = "${var.green_az}"
-  begin_signal = "${module.bg_module.signal}"
 }
 //
 //output "lb_target" {

@@ -1,8 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
+	"os"
+	"strconv"
 	"strings"
 )
 
@@ -42,6 +46,45 @@ var cmds = []string{
 	"g2g",
 }
 
+func main() {
+	cmd := flag.String("operation", "", "")
+	currentBlueCount := flag.Int("currentBlue", 0, "")
+	currentGreenCount := flag.Int("currentGreen", 0, "")
+	desiredBlueCount := flag.Int("desiredBlue", 0, "")
+	desiredGreenCount := flag.Int("desiredGreen", 0, "")
+	flag.Parse()
+	from, to, err := parseFromAndToFromCmd(*cmd)
+	if err != nil {
+		exitError(err)
+	}
+	command := Command{
+		cmd:               *cmd,
+		fromState:         from,
+		toState:           to,
+		currentBlueCount:  *currentBlueCount,
+		currentGreenCount: *currentGreenCount,
+		desiredBlueCount:  *desiredBlueCount,
+		desiredGreenCount: *desiredGreenCount,
+	}
+	executedCmd, err := command.execute()
+	executedCmd.DesiredBlueCount = strconv.Itoa(executedCmd.desiredBlueCount)
+	executedCmd.DesiredGreenCount = strconv.Itoa(executedCmd.desiredGreenCount)
+	if err != nil {
+		exitError(err)
+	}
+	bytes, err := json.Marshal(executedCmd)
+	if err != nil {
+		exitError(err)
+	}
+	jsonOut := string(bytes)
+	fmt.Print(jsonOut)
+}
+
+func exitError(err error) {
+	os.Stderr.WriteString(err.Error())
+	os.Exit(-1)
+}
+
 type Command struct {
 	cmd                  string
 	fromState            string
@@ -50,7 +93,19 @@ type Command struct {
 	currentGreenCount    int
 	desiredBlueCount     int
 	desiredGreenCount    int
-	loadBalanceDirection string
+	DesiredBlueCount     string `json:"desiredBlueCount"`
+	DesiredGreenCount    string `json:"desiredGreenCount"`
+	LoadBalanceDirection string `json:"loadBalanceDirection"`
+}
+
+func (cmd Command) execute() (Command, error) {
+	if err := fromStateCheckers[cmd.fromState](cmd); err != nil {
+		return Command{}, err
+	}
+	if err := toStateCheckers[cmd.toState](cmd); err != nil {
+		return Command{}, err
+	}
+	return cmd.adjustDesiredCount().setLoadBalanceDirection(), nil
 }
 
 func parseFromAndToFromCmd(cmd string) (string, string, error) {
@@ -170,9 +225,9 @@ func (cmd Command) adjustDesiredCount() Command {
 
 func (cmd Command) setLoadBalanceDirection() Command {
 	if cmd.toState == Staging {
-		cmd.loadBalanceDirection = cmd.fromState
+		cmd.LoadBalanceDirection = cmd.fromState
 	} else {
-		cmd.loadBalanceDirection = cmd.toState
+		cmd.LoadBalanceDirection = cmd.toState
 	}
 	return cmd
 }
