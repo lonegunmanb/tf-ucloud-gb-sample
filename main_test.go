@@ -18,6 +18,8 @@ func TestParseFromAndToStatesFromCmd(t *testing.T) {
 		{"g2s", Green, Staging},
 		{"s2b", Staging, Blue},
 		{"s2g", Staging, Green},
+		{"b2b", Blue, Blue},
+		{"g2g", Green, Green},
 	}
 
 	for _, input := range inputs {

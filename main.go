@@ -25,6 +25,12 @@ var fromStateCheckers = map[string]func(Command) error{
 	Staging: checkFromStagingState,
 }
 
+var toStateCheckers = map[string]func(Command) error{
+	Blue:    checkToBlueState,
+	Green:   checkToGreenState,
+	Staging: checkToStagingState,
+}
+
 var cmds = []string{
 	"i2b",
 	"i2g",
@@ -32,6 +38,8 @@ var cmds = []string{
 	"g2s",
 	"s2b",
 	"s2g",
+	"b2b",
+	"g2g",
 }
 
 type Command struct {
