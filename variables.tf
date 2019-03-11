@@ -40,3 +40,12 @@ variable "server_name_prefix" {
 variable "operation" {}
 variable "desired_blue_count" {}
 variable "desired_green_count" {}
+
+variable "lb_cidr" {
+  default = "10.0.2.0/24"
+}
+variable "lb_name" {
+  default = "example-bg-lb"
+}
+variable "backend_port" {}
+variable "listener_port" {}

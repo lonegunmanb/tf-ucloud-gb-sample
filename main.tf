@@ -43,6 +43,14 @@ module "bg_module" {
   current_green_count = "${local.current_green_count}"
 }
 
+locals {
+  lb_direction = "${module.bg_module.lb_direction}"
+}
+
+locals {
+  backend_count = "${local.lb_direction == "blue" ? module.bg_module.desired_blue_count : module.bg_module.desired_green_count}"
+}
+
 module "blue" {
   source = "./instance"
   vpc_id = "${module.network.vpc_id}"
@@ -71,9 +79,24 @@ module "green" {
   az = "${var.green_az}"
 }
 
+locals {
+  server_ids = "${split(",", local.lb_direction == "blue" ? join(",", module.blue.ids) : join(",", module.green.ids))}"
+}
 
+module "load_balancer" {
+  source = "./loadbalance"
+  backend_port = "${var.backend_port}"
+  listener_port = "${var.listener_port}"
+  lb_cidr = "${var.lb_cidr}"
+  vpc_id = "${module.network.vpc_id}"
+  backend_count = "${local.backend_count}"
+  server_ids = "${local.server_ids}"
+  lb_direction = "${local.lb_direction}"
+}
 
-
+output "elb_ip" {
+  value = "${module.load_balancer.elb_eip}"
+}
 //
 //output "lb_target" {
 //  value = "${module.bg_module.lb_target}"
