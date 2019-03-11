@@ -148,6 +148,8 @@ func TestCheckToStagingStateWithIncorrectStatusShouldReturnError(t *testing.T) {
 		{desiredBlueCount: 1, desiredGreenCount: 0},
 		{currentBlueCount: 2, currentGreenCount: 0, desiredBlueCount: 1, desiredGreenCount: 1, fromState: Blue},
 		{currentBlueCount: 0, currentGreenCount: 2, desiredBlueCount: 1, desiredGreenCount: 1, fromState: Green},
+		{desiredBlueCount: -1, desiredGreenCount: 1},
+		{desiredBlueCount: 1, desiredGreenCount: -1},
 	}
 	for _, cmd := range incorrectCmds {
 		err := checkToStagingState(cmd)
@@ -169,6 +171,7 @@ func TestCheckToStagingStateWithCorrectStatusShouldReturnNil(t *testing.T) {
 func TestCheckToBlueWithIncorrectStatusShouldReturnError(t *testing.T) {
 	incorrectCmds := []Command{
 		{desiredBlueCount: 0},
+		{desiredBlueCount: -1},
 		{desiredBlueCount: 1, desiredGreenCount: 1},
 	}
 	for _, incorrectCmd := range incorrectCmds {
@@ -191,6 +194,7 @@ func TestCheckToBlueWithCorrectStatusShouldReturnNil(t *testing.T) {
 func TestCheckToGreenWithIncorrectStatusShouldReturnError(t *testing.T) {
 	incorrectCmds := []Command{
 		{desiredGreenCount: 0},
+		{desiredGreenCount: -1},
 		{desiredGreenCount: 1, desiredBlueCount: 1},
 	}
 	for _, incorrectCmd := range incorrectCmds {

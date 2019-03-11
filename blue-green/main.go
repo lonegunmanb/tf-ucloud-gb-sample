@@ -203,8 +203,8 @@ func checkFromStagingState(cmd Command) error {
 }
 
 func checkToStagingState(cmd Command) error {
-	if cmd.desiredBlueCount == 0 || cmd.desiredGreenCount == 0 {
-		return errors.New("either blue or green desired count is zero, are you really want transit to staging?")
+	if cmd.desiredBlueCount <= 0 || cmd.desiredGreenCount <= 0 {
+		return errors.New("either blue or green desired count is lesser or equal to zero, potentially misconfig")
 	}
 	if cmd.fromState == Blue && cmd.currentBlueCount != cmd.desiredBlueCount {
 		return fmt.Errorf("current blue count is %d and desired blue count is %d, transit to staging state cannot change both blue and green counts", cmd.currentBlueCount, cmd.desiredBlueCount)
@@ -216,8 +216,8 @@ func checkToStagingState(cmd Command) error {
 }
 
 func checkToBlueState(cmd Command) error {
-	if cmd.desiredBlueCount == 0 {
-		return errors.New("cannot transit to blue state with zero blue desired count")
+	if cmd.desiredBlueCount <= 0 {
+		return errors.New("cannot transit to blue state with zero or lesser blue desired count")
 	}
 	if cmd.desiredGreenCount != 0 {
 		return fmt.Errorf("desired green count is %d not zero, potentially misconfig", cmd.desiredGreenCount)
@@ -226,8 +226,8 @@ func checkToBlueState(cmd Command) error {
 }
 
 func checkToGreenState(cmd Command) error {
-	if cmd.desiredGreenCount == 0 {
-		return errors.New("cannot transit to green state with zero green desired count")
+	if cmd.desiredGreenCount <= 0 {
+		return errors.New("cannot transit to green state with zero or lesser green desired count")
 	}
 	if cmd.desiredBlueCount != 0 {
 		return fmt.Errorf("desired blue count is %d not zero, potentially misconfig", cmd.desiredBlueCount)
