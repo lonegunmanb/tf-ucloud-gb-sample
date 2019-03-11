@@ -123,7 +123,7 @@ func (cmd Command) execute() (Command, error) {
 	if err := toStateCheckers[cmd.toState](cmd); err != nil {
 		return Command{}, err
 	}
-	return cmd.adjustDesiredCount().setLoadBalanceDirection(), nil
+	return cmd.setLoadBalanceDirection(), nil
 }
 
 func parseFromAndToFromCmd(cmd string) (string, string, error) {
@@ -219,6 +219,9 @@ func checkToBlueState(cmd Command) error {
 	if cmd.desiredBlueCount == 0 {
 		return errors.New("cannot transit to blue state with zero blue desired count")
 	}
+	if cmd.desiredGreenCount != 0 {
+		return fmt.Errorf("desired green count is %d not zero, potentially misconfig", cmd.desiredGreenCount)
+	}
 	return nil
 }
 
@@ -226,16 +229,10 @@ func checkToGreenState(cmd Command) error {
 	if cmd.desiredGreenCount == 0 {
 		return errors.New("cannot transit to green state with zero green desired count")
 	}
-	return nil
-}
-
-func (cmd Command) adjustDesiredCount() Command {
-	if cmd.toState == Blue {
-		cmd.desiredGreenCount = 0
-	} else if cmd.toState == Green {
-		cmd.desiredBlueCount = 0
+	if cmd.desiredBlueCount != 0 {
+		return fmt.Errorf("desired blue count is %d not zero, potentially misconfig", cmd.desiredBlueCount)
 	}
-	return cmd
+	return nil
 }
 
 func (cmd Command) setLoadBalanceDirection() Command {
