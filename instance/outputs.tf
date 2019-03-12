@@ -1,3 +1,3 @@
-output "ids" {
-  value = "${ucloud_instance.server.*.id}"
+output "lb_id" {
+  value = "${ucloud_lb.load_balancer.id}"
 }

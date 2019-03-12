@@ -14,3 +14,8 @@ variable "vpc_id" {}
 variable "duration" {
   default = 1
 }
+
+variable "lb_name" {}
+variable "lb_cidr" {}
+variable "listener_port" {}
+variable "backend_port" {}

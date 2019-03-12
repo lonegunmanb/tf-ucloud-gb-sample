@@ -41,9 +41,8 @@ variable "operation" {}
 variable "desired_blue_count" {}
 variable "desired_green_count" {}
 
-variable "lb_cidr" {
-  default = "10.0.2.0/24"
-}
+variable "blue_lb_cidr" {}
+variable "green_lb_cidr" {}
 variable "lb_name" {
   default = "example-bg-lb"
 }

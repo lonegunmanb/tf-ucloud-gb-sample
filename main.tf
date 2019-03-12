@@ -4,7 +4,7 @@ provider "ucloud" {
   project_id = "${var.project_id}"
   region = "${var.region}"
 }
-//
+
 resource "null_resource" "server_tag_check" {
   count = "${var.blue_tag == var.green_tag ? 1 : 0}"
   "Error: blue server tag AND green server tag MUST BE UNIQUE" = true
@@ -63,6 +63,10 @@ module "blue" {
   root_password = "${var.root_password}"
   security_group_id = "${module.network.sg_id}"
   az = "${var.blue_az}"
+  backend_port = "${var.backend_port}"
+  listener_port = "${var.listener_port}"
+  lb_cidr = "${var.blue_lb_cidr}"
+  lb_name = "${var.blue_tag}"
 }
 
 module "green" {
@@ -77,26 +81,51 @@ module "green" {
   root_password = "${var.root_password}"
   security_group_id = "${module.network.sg_id}"
   az = "${var.green_az}"
+  lb_cidr = "${var.green_lb_cidr}"
+  listener_port = "${var.listener_port}"
+  backend_port = "${var.backend_port}"
+  lb_name = "${var.green_tag}"
+}
+
+resource "ucloud_eip" "public_ip" {
+  internet_type = "bgp"
+  bandwidth = "200"
+  charge_mode = "traffic"
+  charge_type = "dynamic"
+  name = "test-eip"
 }
 
 locals {
-  server_ids = "${split(",", local.lb_direction == "blue" ? join(",", module.blue.ids) : join(",", module.green.ids))}"
+  target_lb_id = "${local.lb_direction == "blue" ? module.blue.lb_id : module.green.lb_id}"
 }
 
-module "load_balancer" {
-  source = "./loadbalance"
-  backend_port = "${var.backend_port}"
-  listener_port = "${var.listener_port}"
-  lb_cidr = "${var.lb_cidr}"
-  vpc_id = "${module.network.vpc_id}"
-  backend_count = "${local.backend_count}"
-  server_ids = "${local.server_ids}"
-  lb_direction = "${local.lb_direction}"
+resource "ucloud_eip_association" "eip_association" {
+  eip_id = "${ucloud_eip.public_ip.id}"
+  resource_id = "${local.target_lb_id}"
 }
 
-output "elb_ip" {
-  value = "${module.load_balancer.elb_eip}"
+output "eip" {
+  value = "${ucloud_eip.public_ip.public_ip}"
 }
+
+//locals {
+//  server_ids = "${split(",", local.lb_direction == "blue" ? join(",", module.blue.ids) : join(",", module.green.ids))}"
+//}
+//
+//module "load_balancer" {
+//  source = "./loadbalance"
+//  backend_port = "${var.backend_port}"
+//  listener_port = "${var.listener_port}"
+//  lb_cidr = "${var.lb_cidr}"
+//  vpc_id = "${module.network.vpc_id}"
+//  backend_count = "${local.backend_count}"
+//  server_ids = "${local.server_ids}"
+//  lb_direction = "${local.lb_direction}"
+//}
+//
+//output "elb_ip" {
+//  value = "${module.load_balancer.elb_eip}"
+//}
 //
 //output "lb_target" {
 //  value = "${module.bg_module.lb_target}"
