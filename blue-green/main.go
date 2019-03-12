@@ -66,14 +66,7 @@ func parseCommand() (Command, error) {
 	desiredBlueCount := flag.Int("desiredBlue", 0, "")
 	desiredGreenCount := flag.Int("desiredGreen", 0, "")
 	flag.Parse()
-	if *cmd == Destroy {
-		//desired blue and green count equal to current blue and green count in case of we use "destroy" operation but use terraform apply by mistake
-		outputCommand(Command{
-			DesiredBlueCount:  strconv.Itoa(*currentBlueCount),
-			DesiredGreenCount: strconv.Itoa(*currentGreenCount),
-		}, nil)
-		os.Exit(0)
-	}
+	exitProcessIfDestroyCommand(*cmd, *currentBlueCount, *currentGreenCount)
 	from, to, err := parseFromAndToFromCmd(*cmd)
 	if err != nil {
 		exitError(err)
@@ -88,6 +81,17 @@ func parseCommand() (Command, error) {
 		desiredGreenCount: *desiredGreenCount,
 	}
 	return command, err
+}
+
+func exitProcessIfDestroyCommand(cmd string, currentBlueCount int, currentGreenCount int) {
+	if cmd == Destroy {
+		//desired blue and green count equal to current blue and green count in case of we use "destroy" operation but use terraform apply by mistake
+		outputCommand(Command{
+			DesiredBlueCount:  strconv.Itoa(currentBlueCount),
+			DesiredGreenCount: strconv.Itoa(currentGreenCount),
+		}, nil)
+		os.Exit(0)
+	}
 }
 
 func outputCommand(executedCmd Command, err error) {
